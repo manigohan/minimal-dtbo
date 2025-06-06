@@ -1,9 +1,31 @@
 #!/bin/sh
 set -e
-# https://learn.adafruit.com/introduction-to-the-beaglebone-black-device-tree/compiling-an-overlay
-dtc -O dtb -o sdm632-xiaomi-onclite.dtbo -b 0 -@ sdm632-xiaomi-onclite.dts
-mkdtboimg cfg_create dtbo-xiaomi-onclite.img dtboimg-xiaomi-onclite.cfg
-dtc -O dtb -o sdm439-xiaomi-pine.dtbo -b 0 -@ sdm439-xiaomi-pine.dts
-mkdtboimg cfg_create dtbo-xiaomi-pine.img dtboimg-xiaomi-pine.cfg
-dtc -O dtb -o sdm429-lenovo-tbx505x.dtbo -b 0 -@ sdm429-lenovo-tbx505x.dts
-mkdtboimg cfg_create dtbo-lenovo-tbx505x.img dtboimg-lenovo-tbx505x.cfg
+
+out="${PWD}/out"
+
+if [ ! -e $out ]; then
+  mkdir $out
+else
+  rm $out -rf
+  mkdir $out
+fi
+
+for dev in *.dts; do
+  device="${dev%.dts}"
+  suffix="${device#*-}"
+
+  cfg="dtboimg-$suffix.cfg"
+  dts="${device}.dts"
+  dtbo="${device}.dtbo"
+  img="dtbo-$suffix.img"
+
+  echo "[i] Building ${dtbo}"
+  dtc -O dtb -o "${dtbo}" -b 0 -@ "${dts}"
+
+  echo "[i] Creating $img"
+  mkdtboimg cfg_create "${img}" "$cfg"
+done
+
+echo "[i] Done!"
+mv *.dtbo *.img out/
+ls out/
