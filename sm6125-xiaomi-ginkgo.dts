@@ -4,4 +4,4 @@
 		qcom,board-id = <34 0>;
 
 		__fixups__ {};
-}
+};
